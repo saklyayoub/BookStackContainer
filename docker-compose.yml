@@ -1,0 +1,41 @@
+version: '2'
+services:
+  mysql:
+    image: mysql:5.7.33
+    env_file: 
+      - .env
+    environment:
+      - "PUID=${PUID}"
+      - "PGID={PGID}"
+      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+      - "MYSQL_USER=${MYSQL_USER}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    network_mode: bridge
+
+  bookstack:
+    image: solidnerd/bookstack:0.31.6
+    env_file: 
+      - .env
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    environment:
+      - "PUID=${PUID}"
+      - "PGID={PGID}"
+      - "APP_URL=${APP_URL}"
+      - "DB_HOST=${MYSQL_HOST}"
+      - "DB_DATABASE=${MYSQL_DATABASE}"
+      - "DB_USERNAME=${MYSQL_USER}"
+      - "DB_PASSWORD=${MYSQL_PASSWORD}"
+      - "VIRTUAL_HOST=${VIRTUAL_HOST}"
+      - "LETSENCRYPT_HOST=${VIRTUAL_HOST}"
+      - "LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}"
+      - "VIRTUAL_PORT=8080"
+    volumes:
+      - ./uploads:/var/www/bookstack/public/uploads
+      - ./storage-uploads:/var/www/bookstack/storage/uploads
+    network_mode: bridge
